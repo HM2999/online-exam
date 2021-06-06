@@ -110,7 +110,7 @@ res.json(fin)
 
 });
 
-router.post('/ph',verify,upload.single('Img'),async (req,res)=>{
+router.put('/',verify,upload.single('Img'),async (req,res)=>{
 try{
 
    const user= await user.updateOne({"_id":req.body._id},{

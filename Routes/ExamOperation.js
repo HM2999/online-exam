@@ -43,7 +43,7 @@ else {cb('err',false)}
 
 
 const upload =multer({storage:storage ,limits:{
-  fileSize:1024*1024*10
+  fileSize:1024*1024*20
 },fileFilter})
 
 
@@ -55,7 +55,9 @@ const upload =multer({storage:storage ,limits:{
 router.get('/',verify,async (req,res)=>{
 
   try {
-    if(req.body.access!='admin') return res.json('you cant get the exam')
+    if(req.body.access =='etudiant') return res.json('you cant get the exam');
+    const admin= await user.findById({'_id':req.body.id});
+    if(admin.access!="admin"||admin.access!="prof") return res.json('you cant get the exam');
     const allexam =await exam.find()
     res.json(allexam)
   } catch (error) {
@@ -94,32 +96,25 @@ try {
 })
  
 //creat exam 
-router.post('/',upload.array('Img',20),verify,async (req,res)=>{
+router.post('/',verify,async (req,res)=>{
 
-  if(req.body.access!="admin") return res.json("access denai")
+  if(req.body.access=="etudiant") return res.json("access denai1")
   const {error}=ExamenValidation(req.body)
   if(error) return res.status(400).send(error.details[0].message)
   
 const R=req.body
 
 
-var paths = req.files.map(file => file.path)
-console.log(paths)
-console.log(req.files)
+
 
 let i=0
 arr=[]
 R.Question.forEach(element => {
-  if(element.src){
-  arr.push({number:element.number,content:element.content,option:element.option,correction:element.correction,src:paths[i],barem:element.barem})
-  i++;
-}else{
-  arr.push({number:element.number,content:element.content,option:element.option,correction:element.correction,src:null,barem:element.barem})
-}
+
+  arr.push({number:element.number,content:element.content,option:element.option,correction:element.correction,src:element.src,barem:element.barem})
   
   return arr
 })
-
 
 const Exam= new exam({
 
@@ -140,6 +135,43 @@ const Exam= new exam({
       res.status(400).send(err);
   }
   });
+
+  router.put('/',upload.array('III',20),verify,async (req,res)=>{
+
+   var paths = req.files.map(file => file.path)
+
+ 
+    let examk =await exam.findOne({"_id":req.body.id})
+
+    let i=0
+
+   
+   try{
+    examk.Question.forEach(async element => {
+      if(element.src==true){
+        const examupdate=await exam.updateOne({"Question._id":element._id},{"$set":{"Question.$.src":paths[i]}});
+        console.log(examupdate)
+      ++i;
+
+    }})
+  
+    examk =await exam.findOne({"_id":req.body.id});
+ console.log(examk)
+    res.json(examk);
+
+  } catch (error) {
+    res.status(400).json(error)
+  }
+
+
+    
+
+  })
+
+
+
+
+
   //add calss to exam
 router.put('/',verify,async (req,res)=>{
 try {
@@ -168,12 +200,15 @@ res.json(resultas)
 
   //update exam
 
-  router.patch('/question',verify,async (req,res)=>{
+  router.patch('/question',verify,upload.single('Img'),async (req,res)=>{
     
  try { 
   if(req.body.access!="admin") return res.json("access denai")
 
-  const examupdate=await exam.updateOne({"Question._id":req.body.idq},{"$set":{"Question.$":{content:req.body.content,option:req.body.option,correction:req.body.correction,number:req.body.number,_id:req.body.idq}
+
+
+
+  const examupdate=await exam.updateOne({"Question._id":req.body.idq},{"$set":{"Question.$":{content:req.body.content,option:req.body.option,correction:req.body.correction,number:req.body.number,_id:req.body.idq,src:file.path}
   }})
 
    res.send(examupdate)

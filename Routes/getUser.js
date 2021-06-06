@@ -45,15 +45,17 @@ const upload =multer({storage:storage ,limits:{
   fileSize:1024*1024*15
 },fileFilter})
 
-
 //get all the user     
-  router.get("/",verify,async (req,res)=>{
+  router.get("/",verify,async (req,res)=>{                 // pages=nomber>0
     try{
       if(req.body.pages<1) return res.send('bad value of the pages')
 
 let Skip=(req.body.pages-1)*20
 
-      if(req.body.access!="admin") return res.send('access denai')
+      if(req.body.access!="admin") return res.send('access denai')  //access=admin
+      const admin= await user.findById({'_id':req.body._id});       
+    if(admin.access!="admin") return res.json('access denai you dont have the right access');
+
       const Count= await user.countDocuments();
     const Users= await user.find().skip(Skip).limit(20)
     .populate('class',"name")
@@ -73,18 +75,47 @@ let Skip=(req.body.pages-1)*20
 
     router.get("/sep",verify,async (req,res)=>{
       try{
-        if(req.body.access!="admin") return res.send('access denai')
-      const Users= await user.find({"_id":req.body._id})
+        if(req.body.access!="admin") return res.send('access denai');
+        const admin= await user.findById({'_id':req.body._id});       
+        if(admin.access!="admin") return res.json('access denai you dont have the right access');
+
+  
+      const Users= await user.find({"apogee":req.body.apogee})
       .populate('class',"semester")
       .exec()
    
-      Users[0].password=''
+      Users[0].password='';
+      Users.password=''
       res.json(Users);
       
       }catch(err)
       {
           res.json({message:err})}    
       });
+//get prof
+
+
+router.get("/prof",verify,async (req,res)=>{
+  try{
+    if(req.body.access!="admin") return res.send('access denai')             //   access=admin
+    const admin= await user.findById({'_id':req.body._id});                  //_id =_id
+    if(admin.access!="admin") return res.json('you cant get the exam');
+
+  const Users= await user.find({"access":"prof"})
+  .populate('class',"semester")
+  .exec()
+
+  Users[0].password='';
+  Users.password=''
+  res.json(Users);
+  
+  }catch(err)
+  {
+      res.json({message:err})}    
+  });
+
+
+
 
 //add users/user to a class      
   router.patch("/",verify,upload.single('Img'),async(req,res)=>{
@@ -127,7 +158,7 @@ let Skip=(req.body.pages-1)*20
        
       })
  
-       res.json("arr1")
+       res.json("success")
     
       }catch(err)
       {
@@ -143,7 +174,7 @@ let Skip=(req.body.pages-1)*20
   try{
     
     let id =req.body.id
-    const data = await class1.updateOne({"semester":req.body.class}
+    const data = await class1.updateOne({"semester":req.body.semester}
     ,{$pull:{"etudient":{$in :[id]}}}
     ,{ multi: true})
   
@@ -175,7 +206,7 @@ res.send(savedClass)
 })
 //get class
 router.get('/class',verify,async(req,res)=>{
-try{const clas= await class1.find({"semester":req.body.semester}).populate('etudient','name').exec()
+try{const clas= await class1.find({"name":req.body.semester}).populate('etudient','name prenom email apogee').exec()
 res.json(clas)}catch(err){res.json(err)}
 
 })
@@ -183,8 +214,10 @@ res.json(clas)}catch(err){res.json(err)}
 router.get('/allclass',verify,async (req,res)=>{
 
     try {
+    
+      
       const all= await class1.find()
-      .populate('etudient',"name prenom")
+      .populate('etudient',"name prenom apogee email ")
       .exec()
  
   

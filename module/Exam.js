@@ -5,7 +5,7 @@ const mongoose =require('mongoose');
 const ExamSchema = new mongoose.Schema({
 module:{type : String},
 class:[
-    {type: mongoose.Schema.Types.ObjectId,
+    {type: String,
     ref:'Class'
     }
 ],
@@ -26,7 +26,7 @@ type:Number,
 required:true
 },
 
-src:String,
+src:"",
 
 option:[String],
 correction:[String]
