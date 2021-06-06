@@ -30,16 +30,13 @@ access:{
         required:true},
         
 photo:String,
-
-semester:[String],
-
 exam:[{type: mongoose.Schema.Types.ObjectId,
        ref:'exam'
     }],
  class:[{type: mongoose.Schema.Types.ObjectId,
         ref:'Class'
      }]
-    
+ 
         
 },{ collection: 'user' });
 module.exports= mongoose.model('user',userShema);

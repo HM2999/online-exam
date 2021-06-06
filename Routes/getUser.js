@@ -6,18 +6,63 @@ const verify = require('./accessController/TokenValidator');
 const access =require('./accessController/accessLevel');
 const Class = require("../module/Class");
 const { collection } = require("../module/user");
+const multer=require('multer')
+
+
+
+function makeid(length) {
+  var result           = [];
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result.push(characters.charAt(Math.floor(Math.random() * 
+charactersLength)));
+ }
+ return result.join('');
+}
+ let email=makeid(10);
+
+
+// Requiring the module
+const reader = require('xlsx');
+
+
+const storage =multer.diskStorage({
+  destination:function(req,file,cb)
+              {cb(null,'xlsxFiles/');},
+  filename:function(req, file , cb){
+            cb(null,email+file.originalname);}
+});
+
+const fileFilter =(req,file,cb)=>{
+  if(file.mimetype==='application/vnd.ms-excel'||file.mimetype==='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'){cb(null,true)}
+else {cb('err',false)}
+
+}
+
+
+const upload =multer({storage:storage ,limits:{
+  fileSize:1024*1024*15
+},fileFilter})
 
 
 //get all the user     
   router.get("/",verify,async (req,res)=>{
     try{
+      if(req.body.pages<1) return res.send('bad value of the pages')
+
+let Skip=(req.body.pages-1)*20
+
       if(req.body.access!="admin") return res.send('access denai')
-    const Users= await user.find()
+      const Count= await user.countDocuments();
+    const Users= await user.find().skip(Skip).limit(20)
     .populate('class',"name")
     .exec()
   
   Users.forEach(element => {element.password=null})
+  Users.push(Count/20)
     res.json(Users);
+
     
     }catch(err)
     {
@@ -29,8 +74,8 @@ const { collection } = require("../module/user");
     router.get("/sep",verify,async (req,res)=>{
       try{
         if(req.body.access!="admin") return res.send('access denai')
-      const Users= await user.find({"_id":req.body.id})
-      .populate('class',"name")
+      const Users= await user.find({"_id":req.body._id})
+      .populate('class',"semester")
       .exec()
    
       Users[0].password=''
@@ -41,44 +86,64 @@ const { collection } = require("../module/user");
           res.json({message:err})}    
       });
 
-//add user to a class      
-  router.patch("/",verify,async(req,res)=>{
+//add users/user to a class      
+  router.patch("/",verify,upload.single('Img'),async(req,res)=>{
     try{
-      const  data=[]
-      const arr =req.body.id
-  console.log(arr)
-      for(i=0;i<arr.length;i++)
-  {
-    let id =arr[i]
-    data[i] = await class1.updateOne({"name":req.body.class,"etudient":{$ne :id} },{$push:{"etudient":id}},{ multi: true})
-    console.log(data[i])
-  }
+    console.log(req.file.filename)
+    const q='./xlsxFiles/'+req.file.filename;
+      const file = reader.readFile(q)
+
+      let data = []
+      
+      const sheets = file.SheetNames
+      
+      for(let i = 0; i < sheets.length; i++)
+      {
+      const temp = reader.utils.sheet_to_json(
+          file.Sheets[file.SheetNames[i]])
+      temp.forEach((res) => {
+        data.push(res)
+      })
+      }
+      console.log(data)
 
 
-  const data1 = await class1.find({"name":req.body.class})
+  
 
-  let idC =data1[0]._id
+   let data0=[];
+   let arr1=[];
 
-  const arr1 =data1[0].etudient;
+      data.forEach(async element => {
 
-
-  arr1.forEach(async (element)=>{
-  let add= await user.updateOne({"_id":element,"class":{$ne :idC}},{$push :{"class":idC}},{multi:true})
-  })
-   
-  res.json(data)
+      
+          data0 = await class1.updateOne({"semester":element.className,"etudient":{$ne :element.id} },{$push:{"etudient":element.id}},{ multi: true})
+     
+          const    data1 = await class1.find({"semester":element.className});
+          // console.log(data1)
+       
+         let add= await user.updateOne({"_id":element.id,"class":{$ne :data1[0]._id}},{$push :{"class":data1[0]._id}},{multi:true})
+         
+         arr1.push(add)
+       
+      })
+ 
+       res.json("arr1")
     
-    }catch(err)
-    {
-        res.json({message:err})}    
-    });
+      }catch(err)
+      {
+          res.json({message:err})}    
+      });
+
+
+   
+ 
     //delete from calss
 
  router.delete("/",verify,async (req,res)=>{
   try{
     
     let id =req.body.id
-    const data = await class1.updateOne({"name":req.body.class}
+    const data = await class1.updateOne({"semester":req.body.class}
     ,{$pull:{"etudient":{$in :[id]}}}
     ,{ multi: true})
   
@@ -95,8 +160,9 @@ router.post('/new',verify,async (req,res)=>{
 try{
   if(req.body.access=="etudient") return res.json('you cant add class')
  const clas = new Class({
-   name:req.body.name,
-   etudient:req.body.etudient
+  semester:req.body.semester,
+   etudient:req.body.etudient,
+   module:req.body.module
   })
 
  const savedClass=  await clas.save()
@@ -109,7 +175,7 @@ res.send(savedClass)
 })
 //get class
 router.get('/class',verify,async(req,res)=>{
-try{const clas= await class1.find({"name":req.body.name}).populate('etudient','name').exec()
+try{const clas= await class1.find({"semester":req.body.semester}).populate('etudient','name').exec()
 res.json(clas)}catch(err){res.json(err)}
 
 })
