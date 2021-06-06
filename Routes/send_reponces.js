@@ -101,4 +101,20 @@ res.send(output)
 
 })
 
+router.get('/detail',verify,async (req,res)=>{
+  try {
+    const a=req.body.user
+
+    const notes= await Reponces.find({user:a})
+    .populate("exam","module")
+    .exec()
+    res.send(notes)
+
+  } catch (err) {
+      res.send(err)
+  }
+
+
+})
+
 module.exports=router;
