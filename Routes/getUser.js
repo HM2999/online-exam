@@ -193,7 +193,7 @@ try{
  const clas = new Class({
   semester:req.body.semester,
    etudient:req.body.etudient,
-   module:req.body.module
+   modules:req.body.modules
   })
 
  const savedClass=  await clas.save()

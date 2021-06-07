@@ -3,7 +3,9 @@ const { string, number } = require('@hapi/joi');
 const mongoose =require('mongoose');
 
 const ExamSchema = new mongoose.Schema({
-module:{type : String},
+module:{type : String}
+,
+semester:String,
 class:[
     {type: String,
     ref:'Class'

@@ -73,7 +73,7 @@ router.get('/',verify,async (req,res)=>{
 try {
 
 
-  const examk =await exam.findOne({"_id":req.body.id})
+  const examk =await exam.findOne({"_id":req.body.examid})
   const user1 = await user.findOne({"_id":req.body.userid})
   if(user1.exam.includes(examk._id)) return res.json("you dont have  the access to the exam")
 
@@ -96,23 +96,27 @@ try {
 })
  
 //creat exam 
-router.post('/',verify,async (req,res)=>{
+router.post('/',verify,upload.array('III',20),async (req,res)=>{
 
   if(req.body.access=="etudiant") return res.json("access denai1")
   const {error}=ExamenValidation(req.body)
   if(error) return res.status(400).send(error.details[0].message)
   
 const R=req.body
-
+var paths = req.files.map(file => file.path)
 
 
 
 let i=0
 arr=[]
 R.Question.forEach(element => {
+if(element.src=="true"){
 
-  arr.push({number:element.number,content:element.content,option:element.option,correction:element.correction,src:element.src,barem:element.barem})
-  
+  arr.push({number:element.number,content:element.content,option:element.option,correction:element.correction,src:paths[i],barem:element.barem})
+  i++;
+} else {
+  arr.push({number:element.number,content:element.content,option:element.option,correction:element.correction,src:"",barem:element.barem})
+}
   return arr
 })
 
@@ -120,6 +124,7 @@ const Exam= new exam({
 
   prof:R.prof,
   class:R.class,
+  semester:R.semester,
   module:R.module,
   date:R.date,
   Question:arr,
@@ -128,7 +133,7 @@ const Exam= new exam({
 
   try{  
   const savedExam= await Exam.save()
-  res.json(savedExam);
+  res.json(savedExam); 
   } 
   catch(err){
   
@@ -136,37 +141,37 @@ const Exam= new exam({
   }
   });
 
-  router.put('/',upload.array('III',20),verify,async (req,res)=>{
+//   router.put('/',upload.array('III',20),verify,async (req,res)=>{
 
-   var paths = req.files.map(file => file.path)
+//    var paths = req.files.map(file => file.path)
 
  
-    let examk =await exam.findOne({"_id":req.body.id})
+//     let examk =await exam.findOne({"_id":req.body.examid})
 
-    let i=0
+//     let i=0
 
    
-   try{
-    examk.Question.forEach(async element => {
-      if(element.src==true){
-        const examupdate=await exam.updateOne({"Question._id":element._id},{"$set":{"Question.$.src":paths[i]}});
-        console.log(examupdate)
-      ++i;
+//    try{
+//     examk.Question.forEach(async element => {
+//       if(element.src==true){
+//         const examupdate=await exam.updateOne({"Question._id":element._id},{"$set":{"Question.$.src":paths[i]}});
+//         console.log(examupdate)
+//       ++i;
 
-    }})
+//     }})
   
-    examk =await exam.findOne({"_id":req.body.id});
- console.log(examk)
-    res.json(examk);
+//     examk =await exam.findOne({"_id":req.body.id});
+//  console.log(examk)
+//     res.json(examk);
 
-  } catch (error) {
-    res.status(400).json(error)
-  }
+//   } catch (error) {
+//     res.status(400).json(error)
+//   }
 
 
     
 
-  })
+//   })
 
 
 
@@ -205,13 +210,22 @@ res.json(resultas)
  try { 
   if(req.body.access!="admin") return res.json("access denai")
 
+if(req.file.path){
 
 
-
-  const examupdate=await exam.updateOne({"Question._id":req.body.idq},{"$set":{"Question.$":{content:req.body.content,option:req.body.option,correction:req.body.correction,number:req.body.number,_id:req.body.idq,src:file.path}
+  const examupdate=await exam.updateOne({"Question._id":req.body.idq},{"$set":{"Question.$":{content:req.body.content,option:req.body.option,
+    correction:req.body.correction,number:req.body.number,_id:req.body.idq,src:req.file.path}
   }})
+}
+else{
+  const examupdate=await exam.updateOne({"Question._id":req.body.idq},{"$set":{"Question.$":{content:req.body.content,option:req.body.option,correction:req.body.correction,number:req.body.number,_id:req.body.idq}
+}})
+} 
 
-   res.send(examupdate)
+
+
+
+res.send(examupdate)
 
  } catch (err) {
    res.json(err)
@@ -221,7 +235,7 @@ res.json(resultas)
 
   //update date 
   
-  router.patch('/date',verify,isAdmin,async (req,res)=>{
+  router.patch('/date',verify,async (req,res)=>{
    
  try {
    if(req.body.access!="admin") return res.json("access denai")
@@ -241,7 +255,7 @@ res.json(resultas)
   })
   
   //remove exam
-  router.delete('/',verify,isAdmin,async (req,res)=>{
+  router.delete('/',verify,async (req,res)=>{
 
     try {
       if(req.body.access!="admin") return res.json("access denai")

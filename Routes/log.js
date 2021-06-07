@@ -7,7 +7,7 @@ const {loginValidation,registerValidation}=require('./accessController/validatio
 const bcrypt =require('bcryptjs')
 const jwt =require('jsonwebtoken')
 const verify = require('./accessController/TokenValidator');
-
+const classes=require('../module/Class');
 
 const multer=require('multer')
 
@@ -109,6 +109,7 @@ const fin = {
 res.json(fin)
 
 });
+// update profile
 
 router.put('/',verify,upload.single('Img'),async (req,res)=>{
 try{
@@ -126,7 +127,18 @@ try{
       res.json(err)
     }
     })
-
+// get modules
+router.get('/modules',verify,async (req,res)=>{
+  try{
+  
+    const Class=await classes.find({"etudiet":req.body._id})
+        console.log(Class)
+        res.send(Class)
+    
+      } catch (err) {
+        res.json(err)
+      }
+      })
 
 
 module.exports=router;
