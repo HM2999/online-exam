@@ -4,6 +4,7 @@ const authRoute=require('./Routes/log');
 const getUser=require('./Routes/getUser')
 const reponces=require('./Routes/send_reponces')
 const ExamHandller=require('./Routes/ExamOperation')
+const note=require('./Routes/getnote')
 //data base 
 const mongoose =require('mongoose')
 mongoose.connect(
@@ -37,7 +38,7 @@ app.use('/',authRoute)
 app.use('/admin',getUser)
 app.use('/exam',ExamHandller)
 app.use('/reponces',reponces)
-
+app.use('/affichage',note)
 
 
 
