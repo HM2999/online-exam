@@ -3,9 +3,11 @@ const { string, number } = require('@hapi/joi');
 const mongoose =require('mongoose');
 
 const ExamSchema = new mongoose.Schema({
-module:{type : String},
+module:{type : String}
+,
+semester:String,
 class:[
-    {type: mongoose.Schema.Types.ObjectId,
+    {type: String,
     ref:'Class'
     }
 ],
@@ -26,7 +28,7 @@ type:Number,
 required:true
 },
 
-src:String,
+src:"",
 
 option:[String],
 correction:[String]

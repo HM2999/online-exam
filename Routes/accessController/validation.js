@@ -30,13 +30,13 @@ const registerValidation= data =>{
 const repancesValidation = data =>{
 
 const schema =  {
-user:Joi.required(),
+userid:Joi.required(),
 reponces:Joi.object().keys({
 content:Joi.string(),
 choix:Joi.array(),
 date:Joi.string()
 })
-,exam:Joi.required()
+,examid:Joi.required()
 }
 
         return Joi.validate(data.body, schema);

@@ -1,0 +1,174 @@
+{ "inscription":{
+
+   " name":"",
+    "password" : "",
+    "email":"unique",
+    "apogee":"nomber of 7 bigit",
+    "access":"admin-prof-etudiant"
+},"inscription-return":{
+
+
+  "USer":[]
+
+
+},
+
+
+"login":{
+    "password" : "",
+    "email":"unique"
+}
+,"return":{"user":[],"token":""}
+,"get modules":{
+    "_id":""
+},
+"return1":{"class":""}
+}
+// ----------------------------------------------------------------------------------------------------
+
+//      /admin
+
+
+{
+"getalluser":{
+"access":"admin",
+"pages":"",
+"_id":""
+}
+,"return":{"20 USER"}
+,"get spe user":{
+    "access":"admin",
+    "pages":"",
+    "_id":"",
+    "appogee":""
+
+
+},
+"return":{
+     "USer":{},
+     "semester":"",
+     "_id":"id de semester"
+
+}
+,"get prof":{
+    "access":"admin",
+"_id":""
+},
+"upload files exell to add user to class":{
+    "file"
+}
+,
+"remove user from class":{
+
+    "id":"user id",
+    "semester":""
+},"return":{"{'ok':'1','modifier':'1','find':'1'}"}
+,
+
+"newclass":{
+
+    "semseter":"",
+    "etudient":[""],
+    "module":[""]
+},
+"return":{"class"}
+,
+"getclass":{"semester"},
+"return":{"semester":"","etudiant":{"nom":"","prenom"}}
+,"get all class":{},
+"return":{"semester":"","etudiant":{"nom":"","prenom","email","apogee"}}
+
+
+},
+
+// ========================================================
+
+{
+"get all exam":{
+
+"id":"admin id",
+
+
+},"return":{"exam"}
+
+,
+"get spe exam":{
+    "examid":"",
+    "userid":"",
+
+},"return":{
+    "exam":""
+},
+"creat exam":{
+    "access":"",
+    " prof:,
+    class:,
+    module:,
+    date:,
+
+    Question:({
+            content:,
+            option:,
+            src:,
+            correction:,
+            number:,
+            barem:
+    })"
+},"return":{"exam"},
+
+"upload file":{
+    "file",
+    "examid"
+},
+"return":{"exam"},
+"add class to exam":{"semester","_id":"id exam"},
+"return":{"exam + class:semester"},
+"updqte Question":{"question":[
+{"
+        content:,
+        option:,
+        src:,
+        correction:,
+        number:,
+        barem:"
+}],
+"idq":"id pf question you want to update",
+"aceess":"admin",
+"file"
+
+
+
+},
+"return":{"exam"},
+"update date":{"date","access":"admin","_id":"exam id"},
+"remove exam":{"access":"admin", "_id"}
+
+
+}
+// =========================================
+           // /reponces
+,{
+"send reponces":{
+
+"userid:,
+reponces:({
+content:,
+choix:,
+date:
+})
+,examid:
+}"
+
+
+},
+"return":{"your exam has been ...."}
+
+
+
+
+}
+//====================================
+/note
+,"get notes":{
+    "userid":""
+}
